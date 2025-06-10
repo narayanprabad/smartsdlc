@@ -1,0 +1,239 @@
+Smart SDLC - Functional and Technical Specification
+
+Overview:
+Smart SDLC is a collaborative, role-based, agentic, AI-assisted web platform that automates and streamlines the software development lifecycle. It enables multiple personas to interact through intelligent prompts, document ingestion, and progressive workflows—from requirements gathering to user acceptance testing.
+
+The UI is built with native JavaScript, HTML5, and CSS, requiring no NPM installation. The backend is implemented using Node.js (native modules only), designed to avoid CORS by handling document fetching server-side.
+
+1. User Management & Multi-Tenancy
+
+Login/Registration:
+
+Role-based login (Business Analyst, Architect, Developer, etc.)
+
+Multi-profile support (e.g., Global Clearing BA, PFT BA, etc.)
+
+Secure authentication (support for future SSO integration)
+
+Groups & Roles:
+
+Each profile maps to one or more user groups (e.g., Global Clearing BA → Global Clearing Architect Group)
+
+Admin interface for creating user profiles and assigning them to groups
+
+Every profile includes a provision to assign the individual or group to the next phase in the SDLC (e.g., Business Analyst → Architect, Architect → Developer)
+
+Project Managers have a dedicated interface to assign tasks and artifacts to any role, including Infra/DevOps developers, QA, and UAT teams
+
+2. Business Analyst Module
+
+Landing Page: Tailored welcome message based on the profile (e.g., “Welcome, Global Clearing BA”)
+
+Key Features:
+
+Prompt-driven agent interface to:
+
+Drag and drop multiple files: PDF, Word, Excel, PPT, ZIP
+
+Support for images (JPG, PNG, TIFF)
+
+Intelligent OCR and NLP parsing
+
+URL input with server-side fetching
+
+Authentication-based access with fallback to browser prompt for login
+
+Output: Auto-generated use cases with:
+
+Title, Description, Actors, Dependencies
+
+Metadata (Source File, Timestamp)
+
+Assign use cases to Architect Group
+
+View dashboard of current and past submissions
+
+Download comprehensive requirements spec document (PDF/HTML format)
+
+AI Agent Capabilities:
+
+Prompt-based generation of requirement synopsis
+
+Clustering similar use cases
+
+Flagging missing information
+
+3. Architect Module
+
+Landing Page: Personalized greeting and backlog of assigned use cases
+
+Key Features:
+
+Agent-based prompt interface for:
+
+Architecture decisions
+
+Auto-suggested design patterns (MVC, Event-driven, Microservices, etc.)
+
+Drag-and-drop UI to draw:
+
+Sequence Diagrams
+
+Component Diagrams
+
+Deployment Views
+
+Editable canvas with export to PDF
+
+Iterative refinement of architecture
+
+Version tracking and approval system
+
+Assign refined architectures or design elements to UI developers, backend developers, or DevOps teams
+
+4. UI/UX Developer Module
+
+Key Features:
+
+View use cases with assigned workflows
+
+AI-generated wireframes for each use case
+
+Exportable HTML skeletons
+
+Real-time visual editor to:
+
+Create responsive mockups
+
+Validate UI accessibility and layout guidelines
+
+Receive assignments directly from Architects or Project Managers
+
+5. Scrum Master / Project Manager Module
+
+Key Features:
+
+Align use cases to user stories and sprints
+
+Dashboard for sprint planning and burn-down chart
+
+Workflow:
+
+Align Use Case → User Story → Sprint
+
+Send for Business Analyst sign-off
+
+Log in approvals, rejections, comments
+
+Assign any deliverable to the next role in the chain, including:
+
+Infra/DevOps engineers
+
+QA/UAT testers
+
+End-users for review
+
+6. Developer Module
+
+Key Features:
+
+View sprint-aligned stories
+
+Auto-linked to Jira (optional future integration)
+
+Agent assistant for code scaffolding suggestions
+
+Developer notepad with AI to:
+
+Summarize assigned tasks
+
+Help generate boilerplate code (native JS, Java, etc.)
+
+7. DevOps / Infrastructure Module
+
+Key Features:
+
+Auto-suggested deployment diagrams based on architecture
+
+Instructions for setting up CI/CD pipelines
+
+Dashboard for infrastructure health (placeholder for integrations)
+
+Provision for environment configurations
+
+Tasks assigned by Project Managers or Architects directly
+
+8. User Acceptance Tester (UAT)
+
+Key Features:
+
+View completed features linked to original use cases
+
+Submit test scenarios
+
+Track status of test cases: Passed, Failed, Blocked
+
+Raise bugs linked to Developer module
+
+Receive test instructions assigned by Project Managers
+
+9. End Users / Stakeholders
+
+Key Features:
+
+Simple portal to:
+
+Raise issues/bugs linked to features
+
+View resolution status
+
+Participate in feedback surveys
+
+10. Cross-Cutting Features
+
+Audit Trail: Every action (upload, assign, approve, reject) logged with user, timestamp
+
+Versioning: Use cases, architecture, UI designs are versioned
+
+Exports: Each role can export reports, requirements, designs in PDF/HTML
+
+Notifications: Event-based notifications for assignments, signoffs, and feedback
+
+11. Technology Stack
+
+Frontend: HTML5, CSS3, Vanilla JavaScript (no frameworks)
+
+Backend: Node.js with Express (no NPM dependency, use only native modules)
+
+Storage: Local file-based JSON storage (extensible to DB in future)
+
+Authentication: Basic auth (JWT/SSO in roadmap)
+
+Document Parsing:
+
+OCR: Use Tesseract.js (can be hosted)
+
+PDF: Native PDF.js or server-side PDF parsing
+
+Excel: JS-based XLSX reader
+
+Server-side File Handling:
+
+All URL and file processing done in backend to avoid CORS
+
+Previews and summaries generated using server logic
+
+12. Future Enhancements
+
+Integration with Jira, Confluence, GitHub
+
+Enhanced LLM-based context-aware agents
+
+Real-time collaboration (WebSocket-based)
+
+Mobile-optimized experience
+
+Plug-in-based extension system for workflows
+
+Summary:
+Smart SDLC is a plug-and-play, intelligent SDLC automation tool that empowers each stakeholder in the software lifecycle. With drag-and-drop document handling, role-based agentic behavior, and no external dependencies, it's optimized for enterprise use and rapid deployment.
