@@ -1,0 +1,2 @@
+https://smart-sdlc.replit.app/
+Create project - Deliveries automation - which performs a balancing between CCP side data which comes as a csv file and that of book side GMI data - after balancing, it generates exercise and assignment requests and feeds onto the booking platform which is Nesise.
