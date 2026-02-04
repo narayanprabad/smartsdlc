@@ -1,0 +1,21 @@
+“In Jurassic Park, there was technology everywhere — sensors, fences, trackers.
+But the system didn’t understand why things were happening.
+It could report events, but not the meaning behind them.”
+
+“In many ways, our delivery environments are similar.”
+
+“Our tooling is strong.
+Jira shows activity.
+Git shows change.
+CI shows pass or fail.
+Observability shows incidents.”
+
+“But each system tells only part of the story.”
+
+“What’s often missing is the connection —
+why a change was made,
+what decision it implemented,
+and when it was truly ready.”
+
+“That’s not a tooling problem.
+It’s a systems limitation.”
