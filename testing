@@ -34,3 +34,28 @@ Avoid special characters in cookie value (or properly encode)
 Ensure correct SameSite / Secure flags
 
 But in enterprise reality, A or B is what people do.
+
+What you should do (external Tomcat fix)
+Option 1 (best): LegacyCookieProcessor via context.xml
+
+You already did this. The only remaining question is: did Tomcat actually pick up that context.xml?
+
+For external Tomcat, this must be in one of these places:
+
+✅ A) Inside your WAR (recommended)
+
+src/main/webapp/META-INF/context.xml
+
+and after build, the WAR must contain:
+
+META-INF/context.xml
+
+✅ B) In Tomcat config
+
+$CATALINA_BASE/conf/context.xml (global)
+
+or
+
+$CATALINA_BASE/conf/Catalina/<host>/<appname>.xml (per app)
+
+If you placed it somewhere like build/tomcat/context.xml, Tomcat will ignore it unless your deployment explicitly copies it.
