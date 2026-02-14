@@ -1,21 +1,36 @@
-“In Jurassic Park, there was technology everywhere — sensors, fences, trackers.
-But the system didn’t understand why things were happening.
-It could report events, but not the meaning behind them.”
+Fix Option A (Fastest): Relax cookie characters (Spring Boot)
 
-“In many ways, our delivery environments are similar.”
+Add this to application.properties (or your cloud config):
 
-“Our tooling is strong.
-Jira shows activity.
-Git shows change.
-CI shows pass or fail.
-Observability shows incidents.”
+server.tomcat.relaxed-cookie-chars=|,{,},[,],\,^,`,",<,>,;
+server.tomcat.relaxed-path-chars=|,{,},[,],\,^,`,",<,>,;
 
-“But each system tells only part of the story.”
+Start with this minimal set if you want safer:
 
-“What’s often missing is the connection —
-why a change was made,
-what decision it implemented,
-and when it was truly ready.”
+server.tomcat.relaxed-cookie-chars=[,],|,{},\
 
-“That’s not a tooling problem.
-It’s a systems limitation.”
+Then redeploy and check logs: the “invalid cookie” warnings should disappear.
+
+Fix Option B (Tomcat-side): Legacy cookie processor
+
+If you can edit Tomcat config in that cloud image:
+
+In context.xml (global or app context):
+
+<Context>
+  <CookieProcessor className="org.apache.tomcat.util.http.LegacyCookieProcessor"/>
+</Context>
+
+Restart Tomcat.
+
+This makes Tomcat more forgiving and is often the standard fix for older SSO cookies.
+
+Fix Option C: Fix it at the source (IAM / SiteMinder team)
+
+Best long-term: ask IAM to ensure the cookie conforms to RFC6265:
+
+Avoid special characters in cookie value (or properly encode)
+
+Ensure correct SameSite / Secure flags
+
+But in enterprise reality, A or B is what people do.
