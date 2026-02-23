@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XYZ Balancing – Current vs Proposed</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #0a0e1a;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 40px 32px;
+  }
+
+  .page-title {
+    text-align: center;
+    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #64748b;
+  }
+
+  .page-heading {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #f1f5f9;
+    letter-spacing: -0.5px;
+  }
+
+  .page-sub {
+    text-align: center;
+    font-size: 15px;
+    color: #64748b;
+    margin-bottom: 48px;
+  }
+
+  .container {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+
+  .flow-section {
+    background: #111827;
+    border-radius: 16px;
+    padding: 32px 28px 28px;
+    border: 1px solid #1e293b;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .flow-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+  }
+
+  .flow-section.current::before {
+    background: linear-gradient(90deg, #ef4444, #f97316);
+  }
+
+  .flow-section.proposed::before {
+    background: linear-gradient(90deg, #10b981, #06b6d4);
+  }
+
+  .section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .current .section-badge {
+    background: rgba(239, 68, 68, 0.12);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+
+  .proposed .section-badge {
+    background: rgba(16, 185, 129, 0.12);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: #f1f5f9;
+  }
+
+  .section-desc {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  /* Timeline */
+  .timeline {
+    position: relative;
+    padding-left: 0;
+  }
+
+  .day-block {
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .day-block:last-child {
+    margin-bottom: 0;
+  }
+
+  .day-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .day-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .current .day-dot { background: #f97316; box-shadow: 0 0 8px rgba(249,115,22,0.4); }
+  .proposed .day-dot { background: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.4); }
+
+  .day-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: #94a3b8;
+    letter-spacing: 0.5px;
+  }
+
+  .day-label span {
+    color: #475569;
+    font-weight: 400;
+  }
+
+  .day-content {
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  /* System rows */
+  .system-row {
+    display: grid;
+    grid-template-columns: 70px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+  }
+
+  .sys-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .sys-label.Books and Records { color: #60a5fa; }
+  .sys-label.rms { color: #c084fc; }
+  .sys-label.RMS { color: #c084fc; }
+
+  .sys-detail {
+    font-size: 12.5px;
+    color: #cbd5e1;
+    line-height: 1.4;
+  }
+
+  .status-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* Screen results */
+  .screen-results {
+    margin-left: 20px;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .screen-result {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .screen-result.break {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+  }
+
+  .screen-result.match {
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.15);
+    color: #6ee7b7;
+  }
+
+  .screen-result.info {
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.15);
+    color: #93c5fd;
+  }
+
+  .screen-result.warn {
+    background: rgba(251, 191, 36, 0.08);
+    border: 1px solid rgba(251, 191, 36, 0.15);
+    color: #fcd34d;
+  }
+
+  .screen-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    width: 70px;
+    flex-shrink: 0;
+  }
+
+  /* Connector line between days */
+  .day-connector {
+    width: 1px;
+    height: 12px;
+    margin-left: 4.5px;
+    margin-bottom: 0;
+  }
+  .current .day-connector { background: linear-gradient(to bottom, #f97316, transparent); }
+  .proposed .day-connector { background: linear-gradient(to bottom, #10b981, transparent); }
+
+  /* Comparison label */
+  .compare-label {
+    margin-left: 20px;
+    margin-top: 4px;
+    margin-bottom: 8px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .current .compare-label {
+    background: rgba(239, 68, 68, 0.06);
+    border: 1px dashed rgba(239, 68, 68, 0.25);
+    color: #f87171;
+  }
+
+  .proposed .compare-label {
+    background: rgba(16, 185, 129, 0.06);
+    border: 1px dashed rgba(16, 185, 129, 0.25);
+    color: #34d399;
+  }
+
+  /* Summary box */
+  .summary-box {
+    margin-top: 20px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .current .summary-box {
+    background: rgba(239, 68, 68, 0.06);
+    border: 1px solid rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+  }
+
+  .proposed .summary-box {
+    background: rgba(16, 185, 129, 0.06);
+    border: 1px solid rgba(16, 185, 129, 0.15);
+    color: #6ee7b7;
+  }
+
+  .summary-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .current .summary-title { color: #f87171; }
+  .proposed .summary-title { color: #34d399; }
+
+  /* Arrow between sections */
+  .arrow-divider {
+    display: none;
+  }
+
+  /* Cycle indicator */
+  .cycle-indicator {
+    margin-left: 20px;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    color: #f87171;
+    font-weight: 500;
+  }
+
+  .cycle-indicator svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Legend */
+  .legend {
+    max-width: 1300px;
+    margin: 32px auto 0;
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #64748b;
+  }
+
+  .legend-swatch {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+  }
+
+  .note-section {
+    max-width: 1300px;
+    margin: 24px auto 0;
+    text-align: center;
+    font-size: 12px;
+    color: #475569;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-title">XYZ Entity</div>
+<div class="page-heading">Balancing Approach</div>
+<div class="page-sub">Impact of T vs T+1 booking lag across Encore screens — Current state & proposed solution</div>
+
+<div class="container">
+  <!-- CURRENT STATE -->
+  <div class="flow-section current">
+    <div class="section-badge">⚠ Current State</div>
+    <div class="section-title">Same-Day Comparison</div>
+    <div class="section-desc">Books and Records COB (T) vs RMS COB (T) — same date comparison creates daily rolling breaks</div>
+
+    <div class="timeline">
+      <!-- Monday -->
+      <div class="day-block">
+        <div class="day-header">
+          <div class="day-dot"></div>
+          <div class="day-label">MON 17 FEB <span>— Trade Executed</span></div>
+        </div>
+        <div class="day-content">
+          <div class="system-row">
+            <div class="sys-label Books and Records">Books and Records</div>
+            <div class="sys-detail">Books trade on T (Monday)</div>
+            <div class="status-icon">✅</div>
+          </div>
+          <div class="system-row">
+            <div class="sys-label rms">RMS</div>
+            <div class="sys-detail">Not yet booked — books on T+1</div>
+            <div class="status-icon">⏳</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tuesday -->
+      <div class="day-block">
+        <div class="day-header">
+          <div class="day-dot"></div>
+          <div class="day-label">TUE 18 FEB <span>— Processing Mon 17th COB</span></div>
+        </div>
+        <div class="compare-label">COMPARING: Books and Records Mon 17th vs RMS Mon 17th</div>
+        <div class="day-content">
+          <div class="system-row">
+            <div class="sys-label Books and Records">Books and Records</div>
+            <div class="sys-detail">Has trade, position & P&L from Monday</div>
+            <div class="status-icon">✅</div>
+          </div>
+          <div class="system-row">
+            <div class="sys-label rms">RMS</div>
+            <div class="sys-detail">Trade just booked today — not in Mon COB</div>
+            <div class="status-icon">❌</div>
+          </div>
+        </div>
+        <div class="screen-results">
+          <div class="screen-result break"><span class="screen-name">INTRADAY</span> Unmatched Books and Records trade — RMS not yet received</div>
+          <div class="screen-result break"><span class="screen-name">T+1</span> Books and Records EOD has trade, RMS accumulated does not</div>
+          <div class="screen-result break"><span class="screen-name">P&L</span> Books and Records MTD includes P&L, FO MTD does not</div>
+        </div>
+      </div>
+
+      <!-- Wednesday -->
+      <div class="day-block">
+        <div class="day-header">
+          <div class="day-dot"></div>
+          <div class="day-label">WED 19 FEB <span>— Processing Tue 18th COB</span></div>
+        </div>
+        <div class="compare-label">COMPARING: Books and Records Tue 18th vs RMS Tue 18th</div>
+        <div class="day-content">
+          <div class="system-row">
+            <div class="sys-label Books and Records">Books and Records</div>
+            <div class="sys-detail">Mon trade settled + new Tue trades arrive</div>
+            <div class="status-icon">✅</div>
+          </div>
+          <div class="system-row">
+            <div class="sys-label rms">RMS</div>
+            <div class="sys-detail">Mon trade now present — but Tue trades missing</div>
+            <div class="status-icon">⚠️</div>
+          </div>
+        </div>
+        <div class="screen-results">
+          <div class="screen-result match"><span class="screen-name">MON TRADE</span> Monday's breaks resolve ✓</div>
+          <div class="screen-result break"><span class="screen-name">TUE TRADE</span> New Tuesday trades create fresh breaks</div>
+        </div>
+        <div class="cycle-indicator">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.22-8.56"/><path d="M21 3v5h-5"/></svg>
+          Cycle repeats daily — not scalable for BAU
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-box">
+      <div class="summary-title">Result</div>
+      Every XYZ trade generates a one-day rolling break across Intraday, T+1, and P&L screens. Breaks self-resolve next day but are immediately replaced by new ones. House Ops cannot support this volume of daily noise.
+    </div>
+  </div>
+
+  <!-- PROPOSED STATE -->
+  <div class="flow-section proposed">
+    <div class="section-badge">✦ Proposed</div>
+    <div class="section-title">Shifted Comparison Window</div>
+    <div class="section-desc">Books and Records EOD (T) vs RMS EOD (T+1) — one-day shift eliminates position & P&L breaks</div>
+
+    <div class="timeline">
+      <!-- Monday -->
+      <div class="day-block">
+        <div class="day-header">
+          <div class="day-dot"></div>
+          <div class="day-label">MON 17 FEB <span>— Trade Executed</span></div>
+        </div>
+        <div class="day-content">
+          <div class="system-row">
+            <div class="sys-label Books and Records">Books and Records</div>
+            <div class="sys-detail">Books trade on T (Monday)</div>
+            <div class="status-icon">✅</div>
+          </div>
+          <div class="system-row">
+            <div class="sys-label RMS">RMS</div>
+            <div class="sys-detail">Will book on T+1 (Tuesday)</div>
+            <div class="status-icon">⏳</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tuesday -->
+      <div class="day-block">
+        <div class="day-header">
+          <div class="day-dot"></div>
+          <div class="day-label">TUE 18 FEB <span>— RMS books Monday's trade</span></div>
+        </div>
+        <div class="day-content">
+          <div class="system-row">
+            <div class="sys-label Books and Records">Books and Records</div>
+            <div class="sys-detail">Mon trade settled + new Tue trades booked</div>
+            <div class="status-icon">✅</div>
+          </div>
+          <div class="system-row">
+            <div class="sys-label RMS">RMS</div>
+            <div class="sys-detail">Monday's trade now booked in RMS</div>
+            <div class="status-icon">✅</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wednesday — the rec day -->
+      <div class="day-block">
+        <div class="day-header">
+          <div class="day-dot"></div>
+          <div class="day-label">WED 19 FEB <span>— Balancing Day (T+2)</span></div>
+        </div>
+        <div class="compare-label">COMPARING: Books and Records Mon 17th (T) vs RMS Tue 18th (T+1)</div>
+        <div class="day-content">
+          <div class="system-row">
+            <div class="sys-label Books and Records">Books and Records EOD</div>
+            <div class="sys-detail">Monday 17th — has trade, position & P&L</div>
+            <div class="status-icon">✅</div>
+          </div>
+          <div class="system-row">
+            <div class="sys-label RMS">RMS EOD</div>
+            <div class="sys-detail">Tuesday 18th — has trade, position & P&L</div>
+            <div class="status-icon">✅</div>
+          </div>
+        </div>
+        <div class="screen-results">
+          <div class="screen-result match"><span class="screen-name">POSITION</span> Both sides reflect same traded population</div>
+          <div class="screen-result match"><span class="screen-name">P&L</span> Balanced — Encore treats Pos & P&L as single entity</div>
+          <div class="screen-result match"><span class="screen-name">TRADE EOD</span> Books and Records Tue vs RMS Wed — settled trades match</div>
+        </div>
+
+        <div style="height: 12px"></div>
+
+        <div class="screen-results">
+          <div class="screen-result warn"><span class="screen-name">TRADES</span> New Wed Books and Records trades unmatched — RMS books Thu</div>
+          <div class="screen-result info"><span class="screen-name">ACTION</span> Expected 1-day lag — ignore, self-resolves Thu AM</div>
+        </div>
+      </div>
+
+      <!-- Thursday -->
+      <div class="day-block">
+        <div class="day-header">
+          <div class="day-dot"></div>
+          <div class="day-label">THU 20 FEB <span>— Wed Books and Records trades resolve</span></div>
+        </div>
+        <div class="day-content">
+          <div class="system-row">
+            <div class="sys-label RMS">RMS/RMS</div>
+            <div class="sys-detail">Wednesday's Books and Records trades now booked in RMS</div>
+            <div class="status-icon">✅</div>
+          </div>
+        </div>
+        <div class="screen-results">
+          <div class="screen-result match"><span class="screen-name">TRADES</span> Wed unmatched trades now matched ✓</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-box">
+      <div class="summary-title">Result</div>
+      Position and P&L breaks are <strong>eliminated</strong> through the shifted window. Trade breaks from the T/T+1 lag are a known, expected pattern that self-resolves daily. Genuine exceptions (breaks persisting beyond one day) remain visible and actionable.
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch" style="background:#60a5fa"></div> Books and Records (books on T)</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#c084fc"></div> RMS / RMS (books on T+1)</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#ef4444"></div> Break</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#10b981"></div> Matched</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#fbbf24"></div> Expected lag (self-resolves)</div>
+</div>
+
+<div class="note-section">
+  Trade executed Monday 17th Feb · F&O / SDU / TRS · XYZ regional booking model
+</div>
+
+</body>
+</html>
