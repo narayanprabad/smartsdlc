@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XYZ Reconciliation – Current vs Proposed</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: linear-gradient(160deg, #e8f4fc 0%, #dceefb 30%, #d0e8f8 60%, #c8e2f5 100%);
+    color: #1a3a5c;
+    min-height: 100vh;
+    padding: 40px 32px;
+  }
+
+  .page-title {
+    text-align: center;
+    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #4a7da8;
+  }
+
+  .page-heading {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #0c2d48;
+    letter-spacing: -0.5px;
+  }
+
+  .page-sub {
+    text-align: center;
+    font-size: 15px;
+    color: #5a8ab5;
+    margin-bottom: 48px;
+  }
+
+  .container {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+
+  .flow-section {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 32px 28px 28px;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(12, 45, 72, 0.06), 0 8px 24px rgba(12, 45, 72, 0.04);
+  }
+
+  .flow-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+  }
+
+  .flow-section.current::before {
+    background: linear-gradient(90deg, #c0392b, #e67e22);
+  }
+
+  .flow-section.proposed::before {
+    background: linear-gradient(90deg, #0e8c6b, #1a8fc4);
+  }
+
+  .section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .current .section-badge {
+    background: #fdecea;
+    color: #c0392b;
+    border: 1px solid #f5c6cb;
+  }
+
+  .proposed .section-badge {
+    background: #e6f7f1;
+    color: #0e8c6b;
+    border: 1px solid #a3e4cb;
+  }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: #0c2d48;
+  }
+
+  .section-desc {
+    font-size: 13px;
+    color: #5a8ab5;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  .timeline { position: relative; padding-left: 0; }
+  .day-block { margin-bottom: 20px; position: relative; }
+  .day-block:last-child { margin-bottom: 0; }
+
+  .day-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .day-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .current .day-dot { background: #c0392b; box-shadow: 0 0 8px rgba(192,57,43,0.3); }
+  .proposed .day-dot { background: #0e8c6b; box-shadow: 0 0 8px rgba(14,140,107,0.3); }
+
+  .day-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1a3a5c;
+    letter-spacing: 0.5px;
+  }
+
+  .day-label span {
+    color: #7a9ec2;
+    font-weight: 400;
+  }
+
+  .day-content {
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .system-row {
+    display: grid;
+    grid-template-columns: 70px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(220, 238, 251, 0.5);
+    border: 1px solid rgba(180, 215, 240, 0.6);
+  }
+
+  .sys-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .sys-label.YYY { color: #1565c0; }
+  .sys-label.rms { color: #6a1b9a; }
+  .sys-label.ptp { color: #6a1b9a; }
+
+  .sys-detail {
+    font-size: 12.5px;
+    color: #2c5a7c;
+    line-height: 1.4;
+  }
+
+  .status-icon { font-size: 14px; flex-shrink: 0; }
+
+  .screen-results {
+    margin-left: 20px;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .screen-result {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .screen-result.break {
+    background: #fdecea;
+    border: 1px solid #f5c6cb;
+    color: #a93226;
+  }
+
+  .screen-result.match {
+    background: #e6f7f1;
+    border: 1px solid #a3e4cb;
+    color: #0a7055;
+  }
+
+  .screen-result.info {
+    background: #e3f0fc;
+    border: 1px solid #a8d1f0;
+    color: #0d5a9e;
+  }
+
+  .screen-result.warn {
+    background: #fef9e7;
+    border: 1px solid #f9e29c;
+    color: #9a7b1a;
+  }
+
+  .screen-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    width: 80px;
+    flex-shrink: 0;
+  }
+
+  .compare-label {
+    margin-left: 20px;
+    margin-top: 4px;
+    margin-bottom: 8px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .current .compare-label {
+    background: #fdecea;
+    border: 1px dashed #e8a9a3;
+    color: #c0392b;
+  }
+
+  .proposed .compare-label {
+    background: #e6f7f1;
+    border: 1px dashed #6dd4a8;
+    color: #0e8c6b;
+  }
+
+  .summary-box {
+    margin-top: 20px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .current .summary-box {
+    background: #fdecea;
+    border: 1px solid #f5c6cb;
+    color: #7b241c;
+  }
+
+  .proposed .summary-box {
+    background: #e6f7f1;
+    border: 1px solid #a3e4cb;
+    color: #0a5c47;
+  }
+
+  .summary-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .current .summary-title { color: #c0392b; }
+  .proposed .summary-title { color: #0e8c6b; }
+
+  .cycle-indicator {
+    margin-left: 20px;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    color: #c0392b;
+    font-weight: 500;
+  }
+
+  .cycle-indicator svg { width: 14px; height: 14px; }
+
+  .legend {
+    max-width: 1300px;
+    margin: 32px auto 0;
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #4a7da8;
+  }
+
+  .legend-swatch {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+  }
+
+  .note-section {
+    max-width: 1300px;
+    margin: 24px auto 0;
+    text-align: center;
+    font-size: 12px;
+    color: #7a9ec2;
+    line-height: 1.6;
+  }
+
+  /* TIME TO MARKET */
+  .ttm-section {
+    max-width: 1300px;
+    margin: 48px auto 0;
+  }
+
+  .ttm-title {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #4a7da8;
+    margin-bottom: 8px;
+  }
+
+  .ttm-heading {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 700;
+    color: #0c2d48;
+    margin-bottom: 8px;
+    letter-spacing: -0.3px;
+  }
+
+  .ttm-sub {
+    text-align: center;
+    font-size: 14px;
+    color: #5a8ab5;
+    margin-bottom: 28px;
+  }
+
+  .ttm-grid {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 0;
+    align-items: stretch;
+  }
+
+  .ttm-option {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 28px 24px;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 8px rgba(12, 45, 72, 0.06), 0 8px 24px rgba(12, 45, 72, 0.04);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ttm-option::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+  }
+
+  .ttm-option.opt-a::before {
+    background: linear-gradient(90deg, #1565c0, #5e35b1);
+  }
+
+  .ttm-option.opt-b::before {
+    background: linear-gradient(90deg, #5e35b1, #ad1457);
+  }
+
+  .ttm-option-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .opt-a .ttm-option-badge {
+    background: #e3f0fc;
+    color: #1565c0;
+    border: 1px solid #a8d1f0;
+  }
+
+  .opt-b .ttm-option-badge {
+    background: #f3e5f5;
+    color: #8e24aa;
+    border: 1px solid #ce93d8;
+  }
+
+  .ttm-option-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0c2d48;
+    margin-bottom: 4px;
+  }
+
+  .ttm-option-desc {
+    font-size: 13px;
+    color: #5a8ab5;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .ttm-detail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ttm-detail {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 12px;
+    background: rgba(220, 238, 251, 0.4);
+    border-radius: 8px;
+    border: 1px solid rgba(180, 215, 240, 0.5);
+  }
+
+  .ttm-detail-icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+  }
+
+  .opt-a .ttm-detail-icon {
+    background: #e3f0fc;
+    border: 1px solid #a8d1f0;
+  }
+
+  .opt-b .ttm-detail-icon {
+    background: #f3e5f5;
+    border: 1px solid #ce93d8;
+  }
+
+  .ttm-detail-text {
+    font-size: 12.5px;
+    color: #2c5a7c;
+    line-height: 1.5;
+  }
+
+  .ttm-detail-text strong {
+    color: #0c2d48;
+    font-weight: 600;
+  }
+
+  .ttm-vs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ttm-vs-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.8);
+    border: 1px solid rgba(180, 215, 240, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #4a7da8;
+    letter-spacing: 0.5px;
+  }
+
+  .ttm-pros-cons {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(180, 215, 240, 0.5);
+  }
+
+  .ttm-pc-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .ttm-pc-title.pros { color: #0e8c6b; }
+  .ttm-pc-title.cons { color: #c0392b; }
+
+  .ttm-pc-item {
+    font-size: 12px;
+    color: #2c5a7c;
+    line-height: 1.6;
+    padding-left: 16px;
+    position: relative;
+    margin-bottom: 4px;
+  }
+
+  .ttm-pc-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 7px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .ttm-pc-item.pro::before { background: #0e8c6b; }
+  .ttm-pc-item.con::before { background: #c0392b; }
+
+  .ttm-recommendation {
+    max-width: 1300px;
+    margin: 24px auto 0;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    border-radius: 12px;
+    padding: 20px 24px;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 8px rgba(12, 45, 72, 0.06);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .ttm-rec-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #e3f0fc;
+    border: 1px solid #a8d1f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+  }
+
+  .ttm-rec-text {
+    font-size: 13px;
+    color: #2c5a7c;
+    line-height: 1.6;
+  }
+
+  .ttm-rec-text strong {
+    color: #0c2d48;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-title">XYZ Entity</div>
+<div class="page-heading">Reconciliation Approach</div>
+<div class="page-sub">Impact of T vs T+1 booking lag across Encore screens — Current state & proposed solution</div>
+
+<div class="container">
+  <!-- CURRENT STATE -->
+  <div class="flow-section current">
+    <div class="section-badge">⚠ Current State</div>
+    <div class="section-title">Same-Day Comparison</div>
+    <div class="section-desc">YYY COB (T) vs RMS COB (T) — same date comparison creates daily rolling breaks</div>
+
+    <div class="timeline">
+      <div class="day-block">
+        <div class="day-header">
+          <div class="day-dot"></div>
+          <div class="day-label">MON 17 FEB <span>— Trade Executed</span></div>
+        </div>
+        <div class="day-content">
+          <div class="system-row">
+            <div class="sys-label YYY">YYY</div>
+            <div class="sys-detail">Books trade on T (Monday)</div>
+            <div class="status-icon">✅</div>
+          </div>
+          <div class="system-row">
+            <div class="sys-label rms">RMS</div>
+            <div class="sys-detail">Not yet booked — books on T+1</div>
+            <div class="status-icon">⏳</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="day-block">
+        <div class="day-header">
+          <div class="day-dot"></div>
+          <div class="day-label">TUE 18 FEB <span>— Processing Mon 17th COB</span></div>
+        </div>
+        <div class="compare-label">COMPARING: YYY Mon 17th vs RMS Mon 17th</div>
+        <div class="day-content">
+          <div class="system-row">
+            <div class="sys-label YYY">YYY</div>
+            <div class="sys-detail">Has trade, position & P&L from Monday</div>
+            <div class="status-icon">✅</div>
+          </div>
+          <div class="system-row">
+            <div class="sys-label rms">RMS</div>
+            <div class="sys-detail">Trade just booked today — not in Mon COB</div>
+            <div class="status-icon">❌</div>
+          </div>
+        </div>
+        <div class="screen-results">
+          <div class="screen-result break"><span class="screen-name">INTRADAY</span> Unmatched YYY trade — RMS not yet received</div>
+          <div class="screen-result break"><span class="screen-name">T+1</span> YYY EOD has trade, RMS accumulated does not</div>
+          <div class="screen-result break"><span class="screen-name">POS & P&L</span> YYY has position & P&L, FO does not</div>
+        </div>
+      </div>
+
+      <div class="day-block">
+        <div class="day-header">
+          <div class="day-dot"></div>
+          <div class="day-label">WED 19 FEB <span>— Processing Tue 18th COB</span></div>
+        </div>
+        <div class="compare-label">COMPARING: YYY Tue 18th vs RMS Tue 18th</div>
+        <div class="day-content">
+          <div class="system-row">
+            <div class="sys-label YYY">YYY</div>
+            <div class="sys-detail">Mon trade settled + new Tue trades arrive</div>
+            <div class="status-icon">✅</div>
+          </div>
+          <div class="system-row">
+            <div class="sys-label rms">RMS</div>
+            <div class="sys-detail">Mon trade now present — but Tue trades missing</div>
+            <div class="status-icon">⚠️</div>
+          </div>
+        </div>
+        <div class="screen-results">
+          <div class="screen-result match"><span class="screen-name">MON TRADE</span> Monday's breaks resolve ✓</div>
+          <div class="screen-result break"><span class="screen-name">TUE TRADE</span> New Tuesday trades create fresh breaks</div>
+        </div>
+        <div class="cycle-indicator">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.22-8.56"/><path d="M21 3v5h-5"/></svg>
+          Cycle repeats daily — not scalable for BAU
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-box">
+      <div class="summary-title">Result</div>
+      Every XYZ trade generates a one-day rolling break across Intraday, T+1, and Position & P&L screens. Breaks self-resolve next day but are immediately replaced by new ones. House Ops cannot support this volume of daily noise.
+    </div>
+  </div>
+
+  <!-- PROPOSED STATE -->
+  <div class="flow-section proposed">
+    <div class="section-badge">✦ Proposed</div>
+    <div class="section-title">Shifted Comparison Window</div>
+    <div class="section-desc">YYY EOD (T) vs PTP EOD (T+1) — one-day shift eliminates position & P&L breaks</div>
+
+    <div class="timeline">
+      <div class="day-block">
+        <div class="day-header">
+          <div class="day-dot"></div>
+          <div class="day-label">MON 17 FEB <span>— Trade Executed</span></div>
+        </div>
+        <div class="day-content">
+          <div class="system-row">
+            <div class="sys-label YYY">YYY</div>
+            <div class="sys-detail">Books trade on T (Monday)</div>
+            <div class="status-icon">✅</div>
+          </div>
+          <div class="system-row">
+            <div class="sys-label ptp">RMS</div>
+            <div class="sys-detail">Will book on T+1 (Tuesday)</div>
+            <div class="status-icon">⏳</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="day-block">
+        <div class="day-header">
+          <div class="day-dot"></div>
+          <div class="day-label">TUE 18 FEB <span>— RMS books Monday's trade</span></div>
+        </div>
+        <div class="day-content">
+          <div class="system-row">
+            <div class="sys-label YYY">YYY</div>
+            <div class="sys-detail">Mon trade settled + new Tue trades booked</div>
+            <div class="status-icon">✅</div>
+          </div>
+          <div class="system-row">
+            <div class="sys-label ptp">RMS/PTP</div>
+            <div class="sys-detail">Monday's trade now booked in RMS</div>
+            <div class="status-icon">✅</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="day-block">
+        <div class="day-header">
+          <div class="day-dot"></div>
+          <div class="day-label">WED 19 FEB <span>— Reconciliation Day (T+2)</span></div>
+        </div>
+        <div class="compare-label">COMPARING: YYY Mon 17th (T) vs PTP Tue 18th (T+1)</div>
+        <div class="day-content">
+          <div class="system-row">
+            <div class="sys-label YYY">YYY EOD</div>
+            <div class="sys-detail">Monday 17th — has trade, position & P&L</div>
+            <div class="status-icon">✅</div>
+          </div>
+          <div class="system-row">
+            <div class="sys-label ptp">PTP EOD</div>
+            <div class="sys-detail">Tuesday 18th — has trade, position & P&L</div>
+            <div class="status-icon">✅</div>
+          </div>
+        </div>
+        <div class="screen-results">
+          <div class="screen-result match"><span class="screen-name">POSITION</span> Both sides reflect same traded population</div>
+          <div class="screen-result match"><span class="screen-name">POS & P&L</span> Balanced — Encore treats Pos & P&L as single entity</div>
+          <div class="screen-result match"><span class="screen-name">TRADE EOD</span> YYY Tue vs PTP Wed — settled trades match</div>
+        </div>
+        <div style="height: 12px"></div>
+        <div class="screen-results">
+          <div class="screen-result warn"><span class="screen-name">TRADES</span> New Wed YYY trades unmatched — RMS books Thu</div>
+          <div class="screen-result info"><span class="screen-name">ACTION</span> Expected 1-day lag — ignore, self-resolves Thu AM</div>
+        </div>
+      </div>
+
+      <div class="day-block">
+        <div class="day-header">
+          <div class="day-dot"></div>
+          <div class="day-label">THU 20 FEB <span>— Wed YYY trades resolve</span></div>
+        </div>
+        <div class="day-content">
+          <div class="system-row">
+            <div class="sys-label ptp">RMS/PTP</div>
+            <div class="sys-detail">Wednesday's YYY trades now booked in RMS</div>
+            <div class="status-icon">✅</div>
+          </div>
+        </div>
+        <div class="screen-results">
+          <div class="screen-result match"><span class="screen-name">TRADES</span> Wed unmatched trades now matched ✓</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-box">
+      <div class="summary-title">Result</div>
+      Position and P&L breaks are <strong>eliminated</strong> through the shifted window. Trade breaks from the T/T+1 lag are a known, expected pattern that self-resolves daily. Genuine exceptions (breaks persisting beyond one day) remain visible and actionable.
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch" style="background:#1565c0"></div> YYY (books on T)</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#6a1b9a"></div> RMS / PTP (books on T+1)</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#c0392b"></div> Break</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#0e8c6b"></div> Matched</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#d4a017"></div> Expected lag (self-resolves)</div>
+</div>
+
+<div class="note-section">
+  Trade executed Monday 17th Feb · F&O / SDU / TRS · XYZ regional booking model
+</div>
+
+<!-- TIME TO MARKET -->
+<div class="ttm-section">
+  <div class="ttm-title">Implementation</div>
+  <div class="ttm-heading">Time to Market — Two Approaches</div>
+  <div class="ttm-sub">Options for enabling the T+2 shifted comparison model for XYZ legal entities in Encore</div>
+
+  <div class="ttm-grid">
+    <div class="ttm-option opt-a">
+      <div class="ttm-option-badge">Option A</div>
+      <div class="ttm-option-title">Backend Exception</div>
+      <div class="ttm-option-desc">T+2 comparison logic hardcoded as an exception rule in the reconciliation engine</div>
+
+      <div class="ttm-detail-list">
+        <div class="ttm-detail">
+          <div class="ttm-detail-icon">⚙️</div>
+          <div class="ttm-detail-text"><strong>How it works:</strong> XYZ legal entities are hardcoded in backend config. The rec engine detects these LEs and automatically applies the shifted window — YYY EOD (T) vs PTP EOD (T+1).</div>
+        </div>
+        <div class="ttm-detail">
+          <div class="ttm-detail-icon">🔧</div>
+          <div class="ttm-detail-text"><strong>Change required:</strong> Backend code change to the reconciliation engine. Each new LE requires a code deployment.</div>
+        </div>
+        <div class="ttm-detail">
+          <div class="ttm-detail-icon">📋</div>
+          <div class="ttm-detail-text"><strong>Trade breaks:</strong> Auto-suppress one-day-old unmatched YYY trades for flagged LEs, separating expected timing lags from genuine exceptions.</div>
+        </div>
+      </div>
+
+      <div class="ttm-pros-cons">
+        <div class="ttm-pc-title pros">PROS</div>
+        <div class="ttm-pc-item pro">Faster initial delivery — no UI changes needed</div>
+        <div class="ttm-pc-item pro">Centralised control — less risk of misconfiguration</div>
+        <div class="ttm-pc-item pro">Suitable for LVT and initial client activity</div>
+        <div style="height: 12px"></div>
+        <div class="ttm-pc-title cons">CONS</div>
+        <div class="ttm-pc-item con">Every new LE requires a code change and deployment</div>
+        <div class="ttm-pc-item con">Not self-service — ops teams depend on tech for changes</div>
+        <div class="ttm-pc-item con">Not scalable long-term as LE count grows</div>
+      </div>
+    </div>
+
+    <div class="ttm-vs">
+      <div class="ttm-vs-badge">VS</div>
+    </div>
+
+    <div class="ttm-option opt-b">
+      <div class="ttm-option-badge">Option B</div>
+      <div class="ttm-option-title">User Screen Tagging</div>
+      <div class="ttm-option-desc">Self-service UI for operations teams to tag legal entities into the T+2 reconciliation model</div>
+
+      <div class="ttm-detail-list">
+        <div class="ttm-detail">
+          <div class="ttm-detail-icon">🖥️</div>
+          <div class="ttm-detail-text"><strong>How it works:</strong> A configuration screen in Encore allows users to tag specific LEs as "T+2 model". The rec engine reads this config dynamically and applies the shifted comparison window.</div>
+        </div>
+        <div class="ttm-detail">
+          <div class="ttm-detail-icon">🏷️</div>
+          <div class="ttm-detail-text"><strong>Change required:</strong> New UI configuration screen for LE tagging, backend changes to read dynamic config, and validation / audit trail for LE assignments.</div>
+        </div>
+        <div class="ttm-detail">
+          <div class="ttm-detail-icon">📋</div>
+          <div class="ttm-detail-text"><strong>Trade breaks:</strong> Same auto-suppression logic, but driven by LE tags set through the UI rather than hardcoded rules.</div>
+        </div>
+      </div>
+
+      <div class="ttm-pros-cons">
+        <div class="ttm-pc-title pros">PROS</div>
+        <div class="ttm-pc-item pro">Self-service — ops teams onboard new LEs without tech</div>
+        <div class="ttm-pc-item pro">Scalable — supports BAU growth as XYZ expands</div>
+        <div class="ttm-pc-item pro">Audit trail — visibility of who tagged which LE and when</div>
+        <div style="height: 12px"></div>
+        <div class="ttm-pc-title cons">CONS</div>
+        <div class="ttm-pc-item con">Longer build time — requires UI development and testing</div>
+        <div class="ttm-pc-item con">Risk of misconfiguration if tagging is not controlled</div>
+        <div class="ttm-pc-item con">May not be ready for LVT timeline</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ttm-recommendation">
+    <div class="ttm-rec-icon">💡</div>
+    <div class="ttm-rec-text">
+      <strong>Recommended path:</strong> Start with <strong>Option A (Backend Exception)</strong> for LVT and initial client activity — faster time to market with controlled risk. Transition to <strong>Option B (User Screen Tagging)</strong> as the strategic long-term solution once XYZ LE count grows and BAU operations require self-service capability.
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
