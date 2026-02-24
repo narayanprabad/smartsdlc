@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Engineering Challenge — DevUp 2026 Booth Mode</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0B0E17;--surface:#131722;--border:rgba(255,255,255,0.06);
+  --text:rgba(255,255,255,0.92);--dim:rgba(255,255,255,0.45);--muted:rgba(255,255,255,0.2);
+  --green:#10B981;--red:#EF4444;--amber:#F59E0B;--blue:#3B82F6;--purple:#8B5CF6;
+  --a:#E84393;--b:#1368CE;--c:#D89E00;--d:#26890C;
+}
+html,body{width:100vw;height:100vh;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;}
+
+/* Particle canvas */
+canvas#bgCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+
+/* Screens */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:40px 60px;opacity:0;pointer-events:none;transition:opacity 0.5s ease;z-index:1;}
+.screen.active{opacity:1;pointer-events:all;}
+
+/* ═══ ATTRACT SCREEN ═══ */
+.attract{text-align:center;}
+.attract-label{font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:4px;text-transform:uppercase;color:var(--red);margin-bottom:20px;animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.attract-title{font-size:clamp(48px,7vw,90px);font-weight:900;letter-spacing:-2px;line-height:1;margin-bottom:16px;}
+.attract-title em{font-style:normal;background:linear-gradient(135deg,#3B82F6,#10B981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.attract-sub{font-size:clamp(18px,2.5vw,28px);color:var(--dim);margin-bottom:40px;line-height:1.4;}
+.attract-stats{display:flex;gap:32px;justify-content:center;margin-bottom:48px;}
+.a-stat{text-align:center;}
+.a-stat-num{font-family:'JetBrains Mono',monospace;font-size:clamp(36px,5vw,56px);font-weight:900;color:var(--green);line-height:1;}
+.a-stat-label{font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+.btn-go{display:inline-flex;align-items:center;gap:12px;padding:24px 64px;background:linear-gradient(135deg,var(--green),#059669);
+  border:none;border-radius:14px;font-size:clamp(22px,3vw,32px);font-weight:800;color:#fff;cursor:pointer;
+  letter-spacing:1px;transition:transform 0.15s;box-shadow:0 0 60px rgba(16,185,129,0.3);}
+.btn-go:hover{transform:scale(1.05);}
+.attract-hint{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);margin-top:24px;letter-spacing:1px;}
+
+/* ═══ QUESTION SCREEN ═══ */
+.q-screen{padding-top:40px;justify-content:flex-start;}
+.q-top{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:1200px;margin-bottom:20px;}
+.q-counter{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--muted);letter-spacing:1px;}
+.q-category{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);}
+
+/* Timer bar */
+.timer-track{width:100%;max-width:1200px;height:8px;background:rgba(255,255,255,0.06);border-radius:4px;margin-bottom:28px;overflow:hidden;}
+.timer-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--amber),var(--red));border-radius:4px;transition:width 0.5s linear;}
+
+/* Question box */
+.q-box{width:100%;max-width:1200px;background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:36px 48px;margin-bottom:28px;text-align:center;}
+.q-text{font-size:clamp(22px,3vw,32px);font-weight:700;line-height:1.4;}
+
+/* Answer grid — large, Kahoot-style */
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%;max-width:1200px;}
+.ans-btn{display:flex;align-items:center;gap:20px;padding:28px 32px;border-radius:14px;border:none;cursor:pointer;
+  font-family:'Inter',sans-serif;font-size:clamp(16px,2vw,22px);font-weight:700;color:#fff;text-align:left;
+  transition:transform 0.15s,filter 0.15s,outline 0.2s;outline:4px solid transparent;}
+.ans-btn:hover:not(:disabled){transform:scale(1.02);filter:brightness(1.1);}
+.ans-btn:disabled{cursor:default;}
+.ans-a{background:var(--a);} .ans-b{background:var(--b);} .ans-c{background:var(--c);color:#1a1a1a;} .ans-d{background:var(--d);}
+.ans-letter{width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:20px;flex-shrink:0;}
+.ans-text{flex:1;line-height:1.35;}
+
+/* Feedback states */
+.ans-btn.correct{outline:5px solid #fff;filter:brightness(1.3)!important;transform:scale(1.03);}
+.ans-btn.wrong{filter:brightness(0.3)!important;transform:scale(0.97);}
+.ans-btn.reveal{outline:5px solid #fff;filter:brightness(1.3)!important;}
+
+/* ═══ REVEAL SCREEN ═══ */
+.reveal{text-align:center;}
+.reveal-icon{font-size:80px;margin-bottom:16px;}
+.reveal-title{font-size:clamp(32px,5vw,56px);font-weight:900;margin-bottom:12px;}
+.reveal-title.correct{color:var(--green);} .reveal-title.wrong{color:var(--red);}
+.reveal-explain{font-size:clamp(16px,2vw,22px);color:var(--dim);max-width:900px;line-height:1.6;margin-bottom:40px;}
+.btn-next{padding:20px 56px;background:var(--surface);border:2px solid var(--green);border-radius:12px;
+  font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--green);cursor:pointer;
+  letter-spacing:1px;transition:all 0.2s;}
+.btn-next:hover{background:rgba(16,185,129,0.1);}
+
+/* ═══ LEADERBOARD / SCORECARD ═══ */
+.score{text-align:center;}
+.score-label{font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:4px;text-transform:uppercase;color:var(--green);margin-bottom:16px;}
+.score-ring{width:200px;height:200px;border-radius:50%;border:8px solid var(--green);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 28px;
+  box-shadow:0 0 80px rgba(16,185,129,0.25);}
+.score-num{font-size:72px;font-weight:900;color:var(--green);line-height:1;}
+.score-denom{font-family:'JetBrains Mono',monospace;font-size:16px;color:var(--muted);}
+.score-rank{font-size:clamp(28px,4vw,48px);font-weight:900;margin-bottom:8px;}
+.score-msg{font-size:20px;color:var(--dim);margin-bottom:36px;max-width:700px;}
+.score-breakdown{display:flex;gap:40px;justify-content:center;margin-bottom:40px;}
+.sb-item{text-align:center;}
+.sb-num{font-family:'JetBrains Mono',monospace;font-size:36px;font-weight:900;line-height:1;}
+.sb-label{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+.btn-row{display:flex;gap:16px;justify-content:center;}
+.btn-replay{padding:18px 40px;background:var(--green);border:none;border-radius:12px;font-size:20px;font-weight:800;color:#fff;cursor:pointer;transition:transform 0.15s;}
+.btn-replay:hover{transform:scale(1.05);}
+.btn-scan{padding:18px 40px;background:var(--surface);border:2px solid var(--border);border-radius:12px;
+  font-size:16px;font-weight:600;color:var(--dim);cursor:pointer;}
+
+/* Confetti */
+.confetti{position:fixed;top:-10px;width:12px;height:12px;border-radius:2px;opacity:0;pointer-events:none;
+  animation:confetti-fall 3s ease-in forwards;}
+@keyframes confetti-fall{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+
+/* Host controls bar */
+.host-bar{position:fixed;bottom:0;left:0;right:0;height:48px;background:rgba(0,0,0,0.8);border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;gap:20px;z-index:100;
+  font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);}
+.host-bar kbd{padding:3px 8px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:4px;font-size:11px;}
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<!-- HOST CONTROLS -->
+<div class="host-bar">
+  <span><kbd>SPACE</kbd> or <kbd>CLICK</kbd> = Next</span>
+  <span><kbd>&larr;</kbd> = Back</span>
+  <span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> = Reveal answer</span>
+  <span><kbd>R</kbd> = Restart</span>
+</div>
+
+<!-- ═══ ATTRACT SCREEN ═══ -->
+<div class="screen active" id="screenAttract">
+  <div class="attract">
+    <div class="attract-label">DevUp 2026 &middot; JPMorganChase Booth</div>
+    <div class="attract-title">
+      Think You Know<br><em>AI in Banking</em>?
+    </div>
+    <p class="attract-sub">8 questions your AI tools can't answer.<br>Prove you understand the risks they don't.</p>
+    <div class="attract-stats">
+      <div class="a-stat"><div class="a-stat-num">8</div><div class="a-stat-label">Questions</div></div>
+      <div class="a-stat"><div class="a-stat-num">20s</div><div class="a-stat-label">Per Question</div></div>
+      <div class="a-stat"><div class="a-stat-num">800</div><div class="a-stat-label">Max Score</div></div>
+    </div>
+    <button class="btn-go" onclick="startQuiz()">Start Challenge</button>
+    <div class="attract-hint">HOST: Press SPACE or click anywhere to begin</div>
+  </div>
+</div>
+
+<!-- ═══ QUESTION SCREEN ═══ -->
+<div class="screen q-screen" id="screenQuestion">
+  <div class="q-top">
+    <div class="q-counter" id="qCounter">Question 1 / 8</div>
+    <div class="q-category" id="qCategory">LLM Behaviour</div>
+  </div>
+  <div class="timer-track"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+  <div class="q-box">
+    <div class="q-text" id="qText"></div>
+  </div>
+  <div class="answers" id="answersGrid"></div>
+</div>
+
+<!-- ═══ REVEAL SCREEN ═══ -->
+<div class="screen" id="screenReveal">
+  <div class="reveal">
+    <div class="reveal-icon" id="revealIcon"></div>
+    <div class="reveal-title" id="revealTitle"></div>
+    <div class="reveal-explain" id="revealExplain"></div>
+    <button class="btn-next" id="btnNext" onclick="nextQuestion()">Next Question &rarr;</button>
+  </div>
+</div>
+
+<!-- ═══ SCORECARD ═══ -->
+<div class="screen" id="screenScore">
+  <div class="score">
+    <div class="score-label">Challenge Complete</div>
+    <div class="score-ring">
+      <div class="score-num" id="finalScore">0</div>
+      <div class="score-denom">/ 800</div>
+    </div>
+    <div class="score-rank" id="finalRank"></div>
+    <div class="score-msg" id="finalMsg"></div>
+    <div class="score-breakdown">
+      <div class="sb-item"><div class="sb-num" style="color:var(--green)" id="sbCorrect">0</div><div class="sb-label">Correct</div></div>
+      <div class="sb-item"><div class="sb-num" style="color:var(--red)" id="sbWrong">0</div><div class="sb-label">Wrong</div></div>
+      <div class="sb-item"><div class="sb-num" style="color:var(--amber)" id="sbPct">0%</div><div class="sb-label">Score</div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-replay" onclick="restart()">Play Again</button>
+      <button class="btn-scan" onclick="show('screenAttract')">Back to Start</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── QUESTIONS ───────────────────────────────────────────────────────
+const QUESTIONS = [
+  {
+    cat: "LLM Behaviour",
+    text: "You run the same prompt through GPT-4 twice on the same codebase. It gives two different refactoring suggestions. In a regulated bank, what is this called?",
+    answers: ["A bug in the model", "Non-determinism \u2014 a model risk concern", "Expected \u2014 just pick the better one", "A temperature setting misconfiguration"],
+    correct: 1,
+    explain: "LLM non-determinism is classified as a model risk concern under SR 11-7. When AI gives different outputs for the same input, it cannot be validated like deterministic software. Banks must document variance ranges and set temperature=0 for compliance-critical use."
+  },
+  {
+    cat: "AI Security",
+    text: "A bank builds an AI assistant that reads Confluence docs. An attacker embeds hidden text in a Confluence page. What attack is this?",
+    answers: ["SQL injection via the AI interface", "Prompt injection through retrieved documents", "Model poisoning of the LLM weights", "Man-in-the-middle on the API call"],
+    correct: 1,
+    explain: "This is indirect prompt injection via RAG. The attacker poisons the documents the model reads. OWASP Top 10 for LLMs lists this as the #1 vulnerability. Every bank RAG system is a potential attack surface."
+  },
+  {
+    cat: "AI Code Quality",
+    text: "Copilot suggests a fix. It passes all tests and security scans. It gets merged. Three months later \u2014 production incident. Most likely reason?",
+    answers: ["Unit tests had low coverage", "Security scanner missed a CVE", "Fix violated an undocumented system contract", "Copilot used a deprecated API"],
+    correct: 2,
+    explain: "Tests check what code DOES. They can\u2019t check what code was MEANT to do. Undocumented contracts \u2014 rate limits, sequencing, regulatory constraints \u2014 are invisible to both Copilot and test suites. This is exactly the gap SmartSDLC closes."
+  },
+  {
+    cat: "AI in Production",
+    text: "A fraud detection model\u2019s recall drops 18% after six months. No code changed. What happened?",
+    answers: ["Model was retrained incorrectly", "Feature store had a data type mismatch", "Model drift \u2014 real-world patterns shifted", "Fraud team changed their threshold"],
+    correct: 2,
+    explain: "Model drift: the world changed, the model didn\u2019t. Without continuous monitoring of input distribution vs training distribution, you won\u2019t know until it\u2019s too late. SR 11-7 requires ongoing model performance monitoring."
+  },
+  {
+    cat: "Agentic AI",
+    text: "An AI agent autonomously resolves Jira tickets via your bank\u2019s APIs. A regulator asks: who is accountable for a change it made to payment config?",
+    answers: ["Engineer who approved the agent", "AI vendor whose model powered it", "Nobody \u2014 no clear owner today", "CISO who signed the AI policy"],
+    correct: 2,
+    explain: "Agentic AI accountability is genuinely unresolved in banking regulation. OCC and FRB guidance hasn\u2019t caught up. This is why leading banks require human-in-the-loop for any agentic action touching production."
+  },
+  {
+    cat: "AI Adoption at Scale",
+    text: "JPMC has 60,000+ engineers. What is the BIGGEST documented barrier to AI coding tool adoption at scale?",
+    answers: ["Engineers don\u2019t trust AI code", "Licensing cost per seat is too high", "AI tools lack internal context", "Legal hasn\u2019t approved data sharing"],
+    correct: 2,
+    explain: "Stack Overflow 2024 and GitLab DevSecOps reports both identify the same #1 barrier: AI tools don\u2019t understand your internal codebase, architecture decisions, or domain conventions. Copilot knows Python. It doesn\u2019t know YOUR system."
+  },
+  {
+    cat: "Legacy + AI",
+    text: "You use an LLM to generate docs for a 40-year-old COBOL settlement system. It produces confident, detailed documentation. What\u2019s the core risk?",
+    answers: ["COBOL is too old for LLMs to parse", "LLM will hallucinate incorrect business rules", "Docs won\u2019t pass the style checker", "LLM will leak code to training data"],
+    correct: 1,
+    explain: "LLMs produce fluent, confident text \u2014 not uncertainty flags. On underdocumented legacy systems, they hallucinate plausible business rules that are completely wrong. Confident hallucination on legacy is more dangerous than no docs at all."
+  },
+  {
+    cat: "The Coherence Question",
+    text: "One AI writes a microservice, another reviews it, a third writes the tests. All pass. What critical input did NONE of them have?",
+    answers: ["Production database schema", "Programming language version", "Business intent and regulatory context", "CI/CD pipeline connection"],
+    correct: 2,
+    explain: "Three AI agents, zero knowledge of WHY. The service compiles, tests pass, review is clean \u2014 nobody checked whether it satisfies the business rule or the regulatory control. This is the SmartSDLC problem statement in one question."
+  }
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────
+let cur = 0, score = 0, correct = 0, wrong = 0;
+let timer = null, timeLeft = 20, answered = false;
+const TIMER_DURATION = 20;
+const POINTS_PER_Q = 100;
+
+// ─── NAVIGATION ─────────────────────────────────────────────────────
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startQuiz() {
+  cur = 0; score = 0; correct = 0; wrong = 0;
+  show('screenQuestion');
+  loadQuestion();
+}
+
+function restart() { show('screenAttract'); }
+
+function loadQuestion() {
+  answered = false;
+  const q = QUESTIONS[cur];
+  document.getElementById('qCounter').textContent = `Question ${cur + 1} / ${QUESTIONS.length}`;
+  document.getElementById('qCategory').textContent = q.cat;
+  document.getElementById('qText').textContent = q.text;
+
+  const grid = document.getElementById('answersGrid');
+  grid.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  const colors = ['ans-a','ans-b','ans-c','ans-d'];
+  q.answers.forEach((ans, i) => {
+    const btn = document.createElement('button');
+    btn.className = `ans-btn ${colors[i]}`;
+    btn.innerHTML = `<div class="ans-letter">${letters[i]}</div><div class="ans-text">${ans}</div>`;
+    btn.onclick = () => handleAnswer(i);
+    grid.appendChild(btn);
+  });
+
+  startTimer();
+}
+
+function startTimer() {
+  timeLeft = TIMER_DURATION;
+  clearInterval(timer);
+  const fill = document.getElementById('timerFill');
+  fill.style.transition = 'none';
+  fill.style.width = '100%';
+  requestAnimationFrame(() => {
+    fill.style.transition = `width ${TIMER_DURATION}s linear`;
+    fill.style.width = '0%';
+  });
+
+  timer = setInterval(() => {
+    timeLeft--;
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      handleAnswer(-1);
+    }
+  }, 1000);
+}
+
+function handleAnswer(chosen) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timer);
+  const q = QUESTIONS[cur];
+  const btns = document.querySelectorAll('.ans-btn');
+  const isCorrect = chosen >= 0 && chosen === q.correct;
+  const pts = isCorrect ? Math.max(50, Math.round(POINTS_PER_Q * (timeLeft / TIMER_DURATION))) : 0;
+
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.correct) btn.classList.add(isCorrect ? 'correct' : 'reveal');
+    else if (i === chosen && !isCorrect) btn.classList.add('wrong');
+    else btn.classList.add('wrong');
+  });
+
+  if (isCorrect) { score += pts; correct++; } else { wrong++; }
+
+  setTimeout(() => showReveal(isCorrect, pts, q.explain), 1200);
+}
+
+function showReveal(isCorrect, pts, explain) {
+  document.getElementById('revealIcon').textContent = isCorrect ? '✅' : '❌';
+  const title = document.getElementById('revealTitle');
+  title.textContent = isCorrect ? `Correct! +${pts} points` : 'Not quite.';
+  title.className = `reveal-title ${isCorrect ? 'correct' : 'wrong'}`;
+  document.getElementById('revealExplain').textContent = explain;
+  document.getElementById('btnNext').textContent = cur < QUESTIONS.length - 1 ? 'Next Question \u2192' : 'See Final Score \u2192';
+  show('screenReveal');
+}
+
+function nextQuestion() {
+  cur++;
+  if (cur >= QUESTIONS.length) { showScore(); return; }
+  show('screenQuestion');
+  loadQuestion();
+}
+
+function showScore() {
+  const pct = Math.round((correct / QUESTIONS.length) * 100);
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('sbCorrect').textContent = correct;
+  document.getElementById('sbWrong').textContent = wrong;
+  document.getElementById('sbPct').textContent = pct + '%';
+
+  let rank, msg;
+  if (pct >= 88) {
+    rank = '\uD83E\uDDE0 AI Risk Authority';
+    msg = 'You understand AI engineering risks at an expert level. Come build with us.';
+    launchConfetti();
+  } else if (pct >= 63) {
+    rank = '\uD83E\uDD16 AI-Aware Engineer';
+    msg = 'Strong showing. A few blind spots left \u2014 ask us about SmartSDLC at the booth.';
+  } else if (pct >= 38) {
+    rank = '\uD83D\uDD27 Traditional Builder';
+    msg = 'You know the fundamentals. AI in banking has new rules \u2014 see the live demo.';
+  } else {
+    rank = '\uD83D\uDCCB Room to Grow';
+    msg = 'Everyone starts somewhere. The live SmartSDLC demo will open your eyes.';
+  }
+
+  document.getElementById('finalRank').textContent = rank;
+  document.getElementById('finalMsg').textContent = msg;
+  show('screenScore');
+}
+
+function launchConfetti() {
+  const colors = ['#10B981','#F59E0B','#3B82F6','#8B5CF6','#EF4444','#E84393'];
+  for (let i = 0; i < 80; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti';
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.animationDelay = (Math.random() * 2) + 's';
+    el.style.animationDuration = (2 + Math.random() * 2) + 's';
+    el.style.width = el.style.height = (10 + Math.random() * 14) + 'px';
+    el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 5000);
+  }
+}
+
+// ─── KEYBOARD CONTROLS (for booth host) ──────────────────────────────
+document.addEventListener('keydown', (e) => {
+  const active = document.querySelector('.screen.active');
+  const id = active ? active.id : '';
+
+  if (e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault();
+    if (id === 'screenAttract') startQuiz();
+    else if (id === 'screenReveal') nextQuestion();
+    else if (id === 'screenScore') restart();
+  }
+
+  if (e.key === 'r' || e.key === 'R') { restart(); }
+
+  // Number keys to select answer
+  if (id === 'screenQuestion' && !answered) {
+    if (e.key === '1') handleAnswer(0);
+    if (e.key === '2') handleAnswer(1);
+    if (e.key === '3') handleAnswer(2);
+    if (e.key === '4') handleAnswer(3);
+  }
+});
+
+// Click anywhere to advance on attract/reveal/score screens
+document.addEventListener('click', (e) => {
+  if (e.target.closest('button')) return;
+  const active = document.querySelector('.screen.active');
+  const id = active ? active.id : '';
+  if (id === 'screenAttract') startQuiz();
+  else if (id === 'screenReveal') nextQuestion();
+});
+
+// ─── PARTICLE BACKGROUND ─────────────────────────────────────────────
+(function() {
+  const c = document.getElementById('bgCanvas');
+  const ctx = c.getContext('2d');
+  const particles = [];
+  function resize() { c.width = window.innerWidth; c.height = window.innerHeight; }
+  window.addEventListener('resize', resize); resize();
+
+  class P {
+    constructor() { this.reset(); }
+    reset() {
+      this.x = Math.random() * c.width;
+      this.y = Math.random() * c.height;
+      this.vx = (Math.random() - 0.5) * 0.4;
+      this.vy = (Math.random() - 0.5) * 0.4;
+      this.r = Math.random() * 1.5 + 0.5;
+      this.a = Math.random() * 0.3 + 0.1;
+    }
+    update() {
+      this.x += this.vx; this.y += this.vy;
+      if (this.x < 0 || this.x > c.width) this.vx *= -1;
+      if (this.y < 0 || this.y > c.height) this.vy *= -1;
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(59,130,246,${this.a})`;
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < 60; i++) particles.push(new P());
+
+  function animate() {
+    ctx.clearRect(0, 0, c.width, c.height);
+    particles.forEach(p => { p.update(); p.draw(); });
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < 120) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(59,130,246,${0.08 * (1 - d / 120)})`;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+</script>
+</body>
+</html>
