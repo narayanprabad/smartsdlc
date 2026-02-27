@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Almea – Current vs Proposed Balancing Approach</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: linear-gradient(160deg, #daeaf7 0%, #cee4f5 40%, #c2dcf0 100%);
+    color: #0c2240;
+    min-height: 100vh;
+    padding: 40px 32px;
+  }
+
+  .page-title {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #2a6496;
+  }
+
+  .page-heading {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #081d36;
+    letter-spacing: -0.5px;
+  }
+
+  .page-sub {
+    text-align: center;
+    font-size: 15px;
+    color: #1e5078;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .trade-id-banner {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .trade-id-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    background: rgba(255,255,255,0.85);
+    border: 1px solid #a3c8e8;
+    color: #0c2240;
+  }
+
+  .trade-id-badge .tid { color: #0d5db8; font-weight: 700; }
+
+  .container {
+    max-width: 1340px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+
+  /* CARDS */
+  .flow-section {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 28px 24px 24px;
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(8, 29, 54, 0.08), 0 8px 28px rgba(8, 29, 54, 0.05);
+  }
+
+  .flow-section::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+  }
+
+  .flow-section.current::before { background: linear-gradient(90deg, #b71c1c, #e65100); }
+  .flow-section.proposed::before { background: linear-gradient(90deg, #0a7c5f, #0d6eaa); }
+
+  .section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .current .section-badge { background: #fce4e4; color: #b71c1c; border: 1px solid #f0b0b0; }
+  .proposed .section-badge { background: #d8f5eb; color: #0a7c5f; border: 1px solid #8edcb8; }
+
+  .section-title {
+    font-size: 21px;
+    font-weight: 700;
+    margin-bottom: 3px;
+    color: #081d36;
+  }
+
+  .section-desc {
+    font-size: 13px;
+    color: #1e5078;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+
+  /* DAY BLOCKS */
+  .day-block {
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .day-block:last-child { margin-bottom: 0; }
+
+  .day-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .day-dot {
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .current .day-dot { background: #b71c1c; box-shadow: 0 0 8px rgba(183,28,28,0.3); }
+  .proposed .day-dot { background: #0a7c5f; box-shadow: 0 0 8px rgba(10,124,95,0.3); }
+
+  .day-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #081d36;
+    letter-spacing: 0.3px;
+  }
+
+  .day-label span { color: #2a6496; font-weight: 500; }
+
+  .day-body { margin-left: 21px; }
+
+  /* SYSTEM ACTIVITY */
+  .activity-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    border-radius: 7px;
+    background: rgba(200, 225, 248, 0.45);
+    border: 1px solid rgba(160, 200, 232, 0.55);
+    margin-bottom: 5px;
+    font-size: 12.5px;
+    color: #0c2240;
+    font-weight: 500;
+  }
+
+  .activity-row .sys {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    width: 38px;
+    flex-shrink: 0;
+  }
+
+  .sys.gmi { color: #0d5db8; }
+  .sys.rms { color: #7b1fa2; }
+
+  /* BALANCING TABLE */
+  .rec-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 8px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(160, 200, 232, 0.55);
+  }
+
+  .rec-table th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 8px 10px;
+    text-align: left;
+    background: rgba(180, 212, 240, 0.5);
+    color: #1a4a72;
+    border-bottom: 1px solid rgba(160, 200, 232, 0.55);
+  }
+
+  .rec-table th:first-child { width: 90px; }
+
+  .rec-table td {
+    padding: 7px 10px;
+    font-size: 12px;
+    border-bottom: 1px solid rgba(200, 225, 248, 0.5);
+    color: #0c2240;
+    font-weight: 500;
+  }
+
+  .rec-table tr:last-child td { border-bottom: none; }
+
+  .rec-table .screen-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: #081d36;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .status-pill.break {
+    background: #fce4e4;
+    color: #b71c1c;
+    border: 1px solid #f0b0b0;
+  }
+
+  .status-pill.match {
+    background: #d8f5eb;
+    color: #0a7c5f;
+    border: 1px solid #8edcb8;
+  }
+
+  .status-pill.warn {
+    background: #fef6d8;
+    color: #8a6d00;
+    border: 1px solid #edd98a;
+  }
+
+  .reason {
+    font-size: 11px;
+    color: #1a4a72;
+    font-weight: 500;
+  }
+
+  /* COMPARE LABEL */
+  .compare-label {
+    margin-bottom: 6px;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .current .compare-label { background: #fce4e4; border: 1px dashed #d98a8a; color: #b71c1c; }
+  .proposed .compare-label { background: #d8f5eb; border: 1px dashed #5cc49a; color: #0a7c5f; }
+
+  /* SUMMARY */
+  .summary-box {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 12.5px;
+    line-height: 1.65;
+    font-weight: 500;
+  }
+
+  .current .summary-box { background: #fce4e4; border: 1px solid #f0b0b0; color: #6b1414; }
+  .proposed .summary-box { background: #d8f5eb; border: 1px solid #8edcb8; color: #064a38; }
+
+  .summary-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .current .summary-title { color: #b71c1c; }
+  .proposed .summary-title { color: #0a7c5f; }
+
+  /* DIVIDER */
+  .day-divider {
+    height: 1px;
+    background: rgba(160, 200, 232, 0.45);
+    margin: 14px 0 14px 21px;
+  }
+
+  /* LEGEND */
+  .legend {
+    max-width: 1340px;
+    margin: 28px auto 0;
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #1a4a72;
+    font-weight: 600;
+  }
+
+  .legend-swatch { width: 9px; height: 9px; border-radius: 2px; }
+
+  .note-section {
+    max-width: 1340px;
+    margin: 20px auto 0;
+    text-align: center;
+    font-size: 12px;
+    color: #2a6496;
+    font-weight: 500;
+  }
+
+  /* TIME TO MARKET */
+  .ttm-section {
+    max-width: 1340px;
+    margin: 48px auto 0;
+  }
+
+  .ttm-title {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #2a6496;
+    margin-bottom: 8px;
+  }
+
+  .ttm-heading {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 700;
+    color: #081d36;
+    margin-bottom: 8px;
+    letter-spacing: -0.3px;
+  }
+
+  .ttm-sub {
+    text-align: center;
+    font-size: 14px;
+    color: #1e5078;
+    margin-bottom: 28px;
+    font-weight: 500;
+  }
+
+  .ttm-grid {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 0;
+    align-items: stretch;
+  }
+
+  .ttm-option {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 24px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 2px 8px rgba(8, 29, 54, 0.08), 0 8px 28px rgba(8, 29, 54, 0.05);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ttm-option::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+  }
+
+  .ttm-option.opt-a::before { background: linear-gradient(90deg, #0d5db8, #5e35b1); }
+  .ttm-option.opt-b::before { background: linear-gradient(90deg, #5e35b1, #ad1457); }
+
+  .ttm-option-badge {
+    display: inline-flex;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .opt-a .ttm-option-badge { background: #d8eaf8; color: #0d5db8; border: 1px solid #8fc0e8; }
+  .opt-b .ttm-option-badge { background: #f0ddf5; color: #7b1fa2; border: 1px solid #c88ddb; }
+
+  .ttm-option-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #081d36;
+    margin-bottom: 4px;
+  }
+
+  .ttm-option-desc {
+    font-size: 12.5px;
+    color: #1e5078;
+    margin-bottom: 16px;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+
+  .ttm-detail {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 9px 12px;
+    background: rgba(200, 225, 248, 0.35);
+    border-radius: 8px;
+    border: 1px solid rgba(160, 200, 232, 0.5);
+    margin-bottom: 8px;
+  }
+
+  .ttm-detail-icon {
+    flex-shrink: 0;
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  .opt-a .ttm-detail-icon { background: #d8eaf8; border: 1px solid #8fc0e8; }
+  .opt-b .ttm-detail-icon { background: #f0ddf5; border: 1px solid #c88ddb; }
+
+  .ttm-detail-text {
+    font-size: 12px;
+    color: #0c2240;
+    line-height: 1.55;
+    font-weight: 500;
+  }
+
+  .ttm-detail-text strong { color: #081d36; font-weight: 700; }
+
+  .ttm-vs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ttm-vs-badge {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.9);
+    border: 1px solid #a3c8e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1a4a72;
+  }
+
+  .ttm-pros-cons {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(160, 200, 232, 0.5);
+  }
+
+  .ttm-pc-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .ttm-pc-title.pros { color: #0a7c5f; }
+  .ttm-pc-title.cons { color: #b71c1c; }
+
+  .ttm-pc-item {
+    font-size: 12px;
+    color: #0c2240;
+    line-height: 1.55;
+    padding-left: 14px;
+    position: relative;
+    margin-bottom: 3px;
+    font-weight: 500;
+  }
+
+  .ttm-pc-item::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 7px;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+  }
+
+  .ttm-pc-item.pro::before { background: #0a7c5f; }
+  .ttm-pc-item.con::before { background: #b71c1c; }
+
+  .ttm-recommendation {
+    max-width: 1340px;
+    margin: 20px auto 0;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(12px);
+    border-radius: 12px;
+    padding: 16px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 2px 8px rgba(8, 29, 54, 0.06);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .ttm-rec-icon {
+    flex-shrink: 0;
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: #d8eaf8;
+    border: 1px solid #8fc0e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .ttm-rec-text {
+    font-size: 13px;
+    color: #0c2240;
+    line-height: 1.6;
+    font-weight: 500;
+  }
+
+  .ttm-rec-text strong { color: #081d36; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="page-title">Almea Entity</div>
+<div class="page-heading">Balancing Approach</div>
+<div class="page-sub">Impact of T vs T+1 booking lag across Encore screens — Current state & proposed solution</div>
+<div class="trade-id-banner">
+  <div class="trade-id-badge">Trade ID: <span class="tid">12345</span> &nbsp;·&nbsp; F&O executed <strong>Monday 17th Feb</strong> &nbsp;·&nbsp; Almea regional booking model</div>
+</div>
+
+<div class="container">
+
+  <!-- ========== CURRENT STATE ========== -->
+  <div class="flow-section current">
+    <div class="section-badge">⚠ Current State</div>
+    <div class="section-title">Same-Day Comparison</div>
+    <div class="section-desc">GMI COB (T) vs RMS COB (T) — same date comparison</div>
+
+    <!-- MONDAY -->
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-dot"></div>
+        <div class="day-label">MON 17 FEB <span>— Trade Executed</span></div>
+      </div>
+      <div class="day-body">
+        <div class="activity-row">
+          <span class="sys gmi">GMI</span> Books Trade 12345 on T (Monday) ✅
+        </div>
+        <div class="activity-row">
+          <span class="sys rms">RMS</span> Not yet booked — will book on T+1 (Tuesday) ⏳
+        </div>
+      </div>
+    </div>
+
+    <div class="day-divider"></div>
+
+    <!-- TUESDAY -->
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-dot"></div>
+        <div class="day-label">TUE 18 FEB <span>— Processing Mon 17th COB</span></div>
+      </div>
+      <div class="day-body">
+        <div class="activity-row">
+          <span class="sys rms">RMS</span> Books Trade 12345 today (T+1) ✅
+        </div>
+        <div class="compare-label">BALANCING: GMI Mon 17th COB vs RMS Mon 17th COB</div>
+        <table class="rec-table">
+          <thead>
+            <tr><th>Screen</th><th>Status</th><th>Reason</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="screen-label">Intraday</td>
+              <td><span class="status-pill match">✓ MATCHED</span></td>
+              <td class="reason">RMS books today, matches GMI intraday</td>
+            </tr>
+            <tr>
+              <td class="screen-label">T+1</td>
+              <td><span class="status-pill match">✓ MATCHED</span></td>
+              <td class="reason">GMI EOD has trade, RMS accumulated now has it</td>
+            </tr>
+            <tr>
+              <td class="screen-label">Pos & P&L</td>
+              <td><span class="status-pill break">✗ BREAK</span></td>
+              <td class="reason">GMI MTD P&L includes Mon; FO MTD does not — FO only starts from Tue</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="day-divider"></div>
+
+    <!-- WEDNESDAY -->
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-dot"></div>
+        <div class="day-label">WED 19 FEB <span>— Processing Tue 18th COB</span></div>
+      </div>
+      <div class="day-body">
+        <div class="compare-label">BALANCING: GMI Tue 18th COB vs RMS Tue 18th COB</div>
+        <table class="rec-table">
+          <thead>
+            <tr><th>Screen</th><th>Status</th><th>Reason</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="screen-label">Intraday</td>
+              <td><span class="status-pill match">✓ MATCHED</span></td>
+              <td class="reason">Already matched on Tuesday</td>
+            </tr>
+            <tr>
+              <td class="screen-label">T+1</td>
+              <td><span class="status-pill match">✓ MATCHED</span></td>
+              <td class="reason">Already matched on Tuesday</td>
+            </tr>
+            <tr>
+              <td class="screen-label">Pos & P&L</td>
+              <td><span class="status-pill break">✗ BREAK</span></td>
+              <td class="reason">GMI MTD = Mon + Tue P&L; FO MTD = Tue only. One-day gap persists all month.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="summary-box">
+      <div class="summary-title">Result</div>
+      Intraday and T+1 trades balance by Tuesday. However, <strong>Pos & P&L breaks persist for the entire month</strong> — GMI MTD always includes one extra day of P&L that FO does not recognise. This break never self-resolves.
+    </div>
+  </div>
+
+  <!-- ========== PROPOSED STATE ========== -->
+  <div class="flow-section proposed">
+    <div class="section-badge">✦ Proposed</div>
+    <div class="section-title">Shifted Comparison Window</div>
+    <div class="section-desc">GMI EOD (T) vs PTP EOD (T+1) — one-day shift</div>
+
+    <!-- MONDAY -->
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-dot"></div>
+        <div class="day-label">MON 17 FEB <span>— Trade Executed</span></div>
+      </div>
+      <div class="day-body">
+        <div class="activity-row">
+          <span class="sys gmi">GMI</span> Books Trade 12345 on T (Monday) ✅
+        </div>
+        <div class="activity-row">
+          <span class="sys rms">RMS</span> Not yet booked — will book on T+1 (Tuesday) ⏳
+        </div>
+      </div>
+    </div>
+
+    <div class="day-divider"></div>
+
+    <!-- TUESDAY -->
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-dot"></div>
+        <div class="day-label">TUE 18 FEB <span>— RMS books Monday's trade</span></div>
+      </div>
+      <div class="day-body">
+        <div class="activity-row">
+          <span class="sys rms">RMS</span> Books Trade 12345 today (T+1) ✅
+        </div>
+        <div class="activity-row">
+          <span class="sys gmi">GMI</span> Mon trade settled + new Tue trades booked ✅
+        </div>
+        <div style="margin-top: 6px;">
+          <table class="rec-table">
+            <thead>
+              <tr><th>Screen</th><th>Status</th><th>Reason</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="screen-label">Intraday</td>
+                <td><span class="status-pill match">✓ MATCHED</span></td>
+                <td class="reason">RMS books today, matches GMI intraday</td>
+              </tr>
+              <tr>
+                <td class="screen-label">T+1</td>
+                <td><span class="status-pill match">✓ MATCHED</span></td>
+                <td class="reason">GMI EOD has trade, RMS accumulated now has it</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="day-divider"></div>
+
+    <!-- WEDNESDAY -->
+    <div class="day-block">
+      <div class="day-header">
+        <div class="day-dot"></div>
+        <div class="day-label">WED 19 FEB <span>— Balancing Day (T+2)</span></div>
+      </div>
+      <div class="day-body">
+        <div class="compare-label">BALANCING: GMI Mon 17th EOD (T) vs PTP Tue 18th EOD (T+1)</div>
+        <table class="rec-table">
+          <thead>
+            <tr><th>Screen</th><th>Status</th><th>Reason</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="screen-label">Intraday</td>
+              <td><span class="status-pill match">✓ MATCHED</span></td>
+              <td class="reason">Already matched on Tuesday</td>
+            </tr>
+            <tr>
+              <td class="screen-label">T+1</td>
+              <td><span class="status-pill match">✓ MATCHED</span></td>
+              <td class="reason">Already matched on Tuesday</td>
+            </tr>
+            <tr>
+              <td class="screen-label">Pos & P&L</td>
+              <td><span class="status-pill match">✓ MATCHED</span></td>
+              <td class="reason">GMI Mon MTD vs PTP Tue MTD — both include trade's full P&L from booking date</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="height: 10px;"></div>
+
+        <table class="rec-table">
+          <thead>
+            <tr><th>Screen</th><th>Status</th><th>Reason</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="screen-label">Trades</td>
+              <td><span class="status-pill warn">⏳ EXPECTED</span></td>
+              <td class="reason">New Wed GMI trades unmatched — RMS books Thu. Known 1-day lag, self-resolves.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="summary-box">
+      <div class="summary-title">Result</div>
+      Intraday and T+1 balance by Tuesday (same as current). <strong>Pos & P&L now also balances</strong> through the shifted window — GMI Mon MTD vs PTP Tue MTD both include the full P&L. New-day trade breaks are a known 1-day lag that self-resolves daily. Genuine exceptions remain visible.
+    </div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch" style="background:#0d5db8"></div> GMI (books on T)</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#7b1fa2"></div> RMS / PTP (books on T+1)</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#b71c1c"></div> Break (persists all month)</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#0a7c5f"></div> Matched</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#8a6d00"></div> Expected lag (self-resolves)</div>
+</div>
+
+<div class="note-section">
+  Trade 12345 · F&O · Almea regional booking model · Positions and P&L balanced as single entity in Encore
+</div>
+
+<!-- ========== TIME TO MARKET ========== -->
+<div class="ttm-section">
+  <div class="ttm-title">Implementation</div>
+  <div class="ttm-heading">Time to Market — Two Approaches</div>
+  <div class="ttm-sub">Options for enabling the T+2 shifted comparison model for Almea legal entities in Encore</div>
+
+  <div class="ttm-grid">
+    <!-- Option A -->
+    <div class="ttm-option opt-a">
+      <div class="ttm-option-badge">Option A</div>
+      <div class="ttm-option-title">Backend Exception</div>
+      <div class="ttm-option-desc">T+2 comparison logic hardcoded as an exception rule in the balancing engine</div>
+
+      <div class="ttm-detail">
+        <div class="ttm-detail-icon">⚙️</div>
+        <div class="ttm-detail-text"><strong>How it works:</strong> Almea LEs are hardcoded in backend config. Balancing engine detects these LEs and applies the shifted window — GMI EOD (T) vs PTP EOD (T+1).</div>
+      </div>
+      <div class="ttm-detail">
+        <div class="ttm-detail-icon">🔧</div>
+        <div class="ttm-detail-text"><strong>Change required:</strong> Backend code change to balancing engine. Each new LE requires a code deployment.</div>
+      </div>
+      <div class="ttm-detail">
+        <div class="ttm-detail-icon">📋</div>
+        <div class="ttm-detail-text"><strong>Trade breaks:</strong> Auto-suppress one-day-old unmatched GMI trades for flagged LEs.</div>
+      </div>
+
+      <div class="ttm-pros-cons">
+        <div class="ttm-pc-title pros">PROS</div>
+        <div class="ttm-pc-item pro">Faster initial delivery — no UI changes</div>
+        <div class="ttm-pc-item pro">Centralised control — less misconfiguration risk</div>
+        <div class="ttm-pc-item pro">Suitable for LVT and initial client activity</div>
+        <div style="height: 10px"></div>
+        <div class="ttm-pc-title cons">CONS</div>
+        <div class="ttm-pc-item con">Each new LE requires code change + deployment</div>
+        <div class="ttm-pc-item con">Not self-service — ops depends on tech</div>
+        <div class="ttm-pc-item con">Not scalable long-term</div>
+      </div>
+    </div>
+
+    <!-- VS -->
+    <div class="ttm-vs">
+      <div class="ttm-vs-badge">VS</div>
+    </div>
+
+    <!-- Option B -->
+    <div class="ttm-option opt-b">
+      <div class="ttm-option-badge">Option B</div>
+      <div class="ttm-option-title">User Screen Tagging</div>
+      <div class="ttm-option-desc">Self-service UI for ops teams to tag legal entities into the T+2 balancing model</div>
+
+      <div class="ttm-detail">
+        <div class="ttm-detail-icon">🖥️</div>
+        <div class="ttm-detail-text"><strong>How it works:</strong> Configuration screen in Encore allows users to tag specific LEs as "T+2 model". Balancing engine reads config dynamically.</div>
+      </div>
+      <div class="ttm-detail">
+        <div class="ttm-detail-icon">🏷️</div>
+        <div class="ttm-detail-text"><strong>Change required:</strong> New UI config screen, backend dynamic config, validation + audit trail for LE assignments.</div>
+      </div>
+      <div class="ttm-detail">
+        <div class="ttm-detail-icon">📋</div>
+        <div class="ttm-detail-text"><strong>Trade breaks:</strong> Same auto-suppression, driven by UI tags instead of hardcoded rules.</div>
+      </div>
+
+      <div class="ttm-pros-cons">
+        <div class="ttm-pc-title pros">PROS</div>
+        <div class="ttm-pc-item pro">Self-service — ops onboards new LEs without tech</div>
+        <div class="ttm-pc-item pro">Scalable for BAU growth</div>
+        <div class="ttm-pc-item pro">Full audit trail</div>
+        <div style="height: 10px"></div>
+        <div class="ttm-pc-title cons">CONS</div>
+        <div class="ttm-pc-item con">Longer build time — UI dev + testing</div>
+        <div class="ttm-pc-item con">Misconfiguration risk if uncontrolled</div>
+        <div class="ttm-pc-item con">May not be ready for LVT timeline</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ttm-recommendation">
+    <div class="ttm-rec-icon">💡</div>
+    <div class="ttm-rec-text">
+      <strong>Recommended path:</strong> Start with <strong>Option A (Backend Exception)</strong> for LVT and initial client activity — faster time to market. Transition to <strong>Option B (User Screen Tagging)</strong> as the strategic solution once Almea LE count grows and BAU requires self-service.
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
