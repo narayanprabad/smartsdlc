@@ -1,0 +1,131 @@
+Expo
+
+
+🟢 INTRO — The AI Landscape (30–35 sec)
+
+“Copilot, Gemini, Cursor, Windsurf, Tabnine, Amazon Q —
+every developer today has AI writing code.
+
+And then autonomous agents — Devin, SWE-Agent, Claude Code —
+planning, debugging, deploying features without a human touching the keyboard.
+
+But here’s the gap.
+
+None of these tools can tell you why the code exists.
+What business decision created it.
+Or whether what shipped matches what was intended.
+
+That’s Smart SDLC.
+
+The missing memory layer.
+
+Intent → decisions → code → evidence.
+
+Your AI doesn’t just build faster —
+it builds the right thing, traceably, at enterprise scale.”
+
+(Pause)
+
+“The world is building faster hammers.
+We built the blueprint that proves you built it right.”
+
+“Left screen is the problem. Right screen is the proof.”
+
+(Point to Monitor 1)
+
+🦖 MONITOR 1 — The Evolution Problem (70–80 sec)
+
+“Software delivery evolved like the Jurassic era.
+
+Waterfall — the Brachiosaurus.
+Massive centralized knowledge. When the architect left, context fossilized.
+
+Agile — the Velociraptor pack.
+Fast, iterative. But context fragmented across sprints.
+
+DevOps — Indominus Rex.
+Engineered for velocity. Pipelines automated everything — except understanding.
+
+Now we’re in the AI-augmented era.
+
+Code generation at machine speed.
+
+Velocity is solved.
+
+Coherence is not.
+
+Every era optimized speed.
+
+No era preserved intent.”
+
+(Pause. Slight shift in tone.)
+
+“Smart SDLC is the tamed raptor.
+
+Fast.
+Disciplined.
+Governed.
+Connected.”
+
+(Point to Monitor 2)
+
+🔵 MONITOR 2 — The Proof: Coherence (75–90 sec)
+
+“Here’s what coherence looks like.
+
+One connected delivery graph.
+
+Business intent.
+Architecture decision.
+Stories.
+Commits.
+Tests.
+Deployment.
+Runtime evidence.
+
+One lineage.
+Fully traceable.
+
+Now imagine this.
+
+A regulator asks:
+
+‘Why does this trading threshold exist?’
+
+No war room.
+No Slack archaeology.
+
+The graph traverses strategy → ADR → code → deployment → evidence — in seconds.
+
+That’s not documentation.
+
+That’s delivery intelligence.
+
+And because it understands intent,
+it detects drift,
+predicts risk,
+and governs AI acceleration.”
+
+🔴 CLOSE — 20 sec
+
+“In 2028, AI will generate most code.
+
+The question won’t be speed.
+
+It will be control.
+
+Smart SDLC connects
+Intent → Decision → Code → Evidence.
+
+Auditable.
+Human-governed.
+Enterprise scale.
+
+Speed was the first act.
+
+Coherence is the next.
+
+That’s Smart SDLC.”
+
+⏱ Total Time: ~2 min 40 sec
+Confident, controlled, not rushed.
