@@ -1,0 +1,80 @@
+Opening (10 seconds)
+“AI is dramatically accelerating software development. Tools like Copilot, Claude Code and Devin can generate huge amounts of code.
+
+But none of them answer a simple enterprise question:
+
+Why does this code exist?”
+
+
+Point to Monitor 1 — The Why
+
+“Software delivery has evolved through several paradigms.
+
+Waterfall gave us planning but no adaptability.
+Agile gave us speed but fragmented context.
+DevOps gave us automation but not understanding.
+And now AI tools are generating code faster than ever.
+
+To explain this evolution, we use a Jurassic World analogy.
+
+In every era, a dominant species believed it had mastered survival.
+The Brachiosaurus was powerful but slow to change.
+The Gallimimus was fast but ran in circles.
+The Spinosaurus was strong but destructive.
+And the Indominus was engineered for speed but impossible to govern.
+
+Every species believed it had solved evolution.
+
+But the one that actually survived was different.
+
+It was smart enough to collaborate.
+
+Across all these SDLC eras, the same thing keeps happening:
+
+Intent gets lost.
+
+Business decisions live in Jira.
+Architecture lives in documents.
+Code lives in Git.
+Test evidence lives somewhere else.
+
+No system connects them.
+
+That’s the coherence gap.”
+
+
+
+Move to Monitor 2 — The How
+
+“This is where Smart SDLC comes in.
+
+Smart SDLC builds a delivery graph that connects:
+
+business intent → architecture decisions → stories → code → tests → deployments → evidence.
+
+And it exposes that through role-aware workspaces.”
+
+
+Point to Demo Roles
+
+“For example:
+
+A Product Owner sees AI-validated stories and impact analysis.
+
+A Developer sees intent, ADRs and constraints directly inside the IDE while coding.
+
+A Director sees real-time delivery confidence without status meetings.
+
+Everyone is looking at the same connected delivery graph.”
+
+Closing (10 seconds)
+
+“So instead of searching across tools, you can ask:
+
+Why does this logic exist?
+
+And the system shows the entire lineage instantly.
+
+AI helped us build software faster.
+
+Smart SDLC helps us build the right thing — coherently and traceably at enterprise scale.”
